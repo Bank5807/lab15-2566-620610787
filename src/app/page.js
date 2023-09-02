@@ -44,7 +44,10 @@ const schema = z
     }),
     hasCoupon: z.boolean(),
     coupon: z.string(),
-    password: z.string(),
+    password: z
+      .string()
+      .min(6, { message: "Password must contain at least 6 characters" })
+      .max(12, { message: "Password must not exceed 12 characters" }),
     confirmPassword: z.string(),
   })
   .refine(
@@ -62,6 +65,18 @@ const schema = z
     {
       message: "Invalid coupon code",
       path: ["coupon"],
+    }
+  )
+  .refine(
+    (data) => {
+      // if user fill confirm password with the same as password
+      if (data.confirmPassword === data.password) return true;
+      // if user didn't fill confirm password and password as the same
+      return false;
+    },
+    {
+      message: "Password does not match",
+      path: ["confirmPassword"],
     }
   );
 
@@ -90,10 +105,14 @@ export default function Home() {
     //TIP : get value of currently filled form with variable "form.values"
 
     if (form.values.plan === "funrun") price = 500;
+    else if (form.values.plan === "mini") price = 800;
+    else if (form.values.plan === "half") price = 1200;
+    else if (form.values.plan === "full") price = 1500;
     //check the rest plans by yourself
     //TIP : check /src/app/libs/runningPlans.js
 
     //check discount here
+    if (form.values.coupon === "CMU2023") price = price * 0.7;
 
     return price;
   };
@@ -175,7 +194,11 @@ export default function Home() {
           </Stack>
         </form>
 
-        <Footer year={2023} fullName="Chayanin Suatap" studentId="650610560" />
+        <Footer
+          year={2023}
+          fullName="Tanat Wipasakunden"
+          studentId="620610787"
+        />
       </Container>
 
       <TermsAndCondsModal opened={opened} close={close} />
